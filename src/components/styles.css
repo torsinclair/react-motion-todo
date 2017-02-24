@@ -6,7 +6,7 @@
   overflow: visible;
   color: #ddd;
   border-radius: 4px;
-  padding: 10px;
+  padding: 12px;
   font-size: 18px;
   font-weight: 400;
   margin: 10px 0;
@@ -23,7 +23,7 @@
   transform-origin: 50% 50% 0px;
   border-radius: 4px;
   color: #747474;
-  padding: 10px;
+  padding: 12px;
   font-size: 18px;
   font-weight: 400;
   background-color: rgb(255, 255, 255);
@@ -36,8 +36,15 @@
   margin: 0;
   margin-right: 10px;
 }
-
-.react-motion-todo-wrapper .task-input {
+.todo-text {
+  display: inline;
+  font-size: 16px;
+}
+.react-motion-todo-wrapper .to-do-task-input {
+  width: calc(100% - 80px);
+  width: -moz-calc(100% - 80px);
+  width: -webkit-calc(100% - 80px);
+  width: -o-calc(100% - 80px);
   border: none;
   background: none;
   -webkit-box-shadow: none;

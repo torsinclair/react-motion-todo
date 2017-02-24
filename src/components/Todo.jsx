@@ -48,6 +48,7 @@ export default class extends Component {
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.addTodo = this.addTodo.bind(this);
+    this.completeTodo = this.completeTodo.bind(this);
   }
   componentDidMount() {
     window.addEventListener('touchmove', this.handleTouchMove);
@@ -82,13 +83,11 @@ export default class extends Component {
 
     if (isPressed) {
       const mouseY = pageY - topDeltaY;
-      const currentRow = clamp(Math.round(mouseY / 100), 0, this.state.todos.length - 1);
+      const currentRow = clamp(Math.round(mouseY / 50), 0, this.state.todos.length - 1);
       let newOrder = order;
-
       if (currentRow !== order.indexOf(originalPosOfLastPressed)) {
         newOrder = reinsert(order, order.indexOf(originalPosOfLastPressed), currentRow);
       }
-
       this.setState({ mouseY, order: newOrder });
     }
   }
@@ -96,6 +95,7 @@ export default class extends Component {
     this.setState({ isPressed: false, topDeltaY: 0 });
   }
   addTodo(event) {
+    if (event.target.value === '') return;
     const todos = this.state.todos;
     const pos = this.state.todos.length;
     todos.push({
@@ -103,7 +103,8 @@ export default class extends Component {
       pos,
       text: event.target.value,
       timestamp: '',
-      isDraggable: true
+      isDraggable: true,
+      isCompleted: false
     });
     this.setState({
       todos
@@ -112,12 +113,16 @@ export default class extends Component {
         order: range(this.state.todos.length)
       });
     });
+    event.target.value = '';
   }
   deleteTodo() {
     //
   }
   updateTodo() {
     //
+  }
+  completeTodo(value, pos) {
+    console.log(value, pos)
   }
   render() {
     const { mouseY, isPressed, originalPosOfLastPressed, order } = this.state;
@@ -130,47 +135,61 @@ export default class extends Component {
           </a>
           <input
             type="text"
-            className="task-input"
+            className="to-do-task-input"
             maxLength="255"
-            placeholder="Add a to-do..."
-            aria-label="Add a to-do"
+            placeholder="Add a To-do..."
+            aria-label="Add a To-do"
             onKeyPress={
               keypress('enter', this.addTodo)
             }
           />
         </div>
-        {this.state.todos.map((todo) => {
-          const style = originalPosOfLastPressed === todo.pos && isPressed
-            ? {
-              scale: spring(1.1, springConfig),
-              shadow: spring(16, springConfig),
-              y: mouseY
-            }
-            : {
-              scale: spring(1, springConfig),
-              shadow: spring(1, springConfig),
-              y: spring(order.indexOf(todo.pos) * 50, springConfig)
-            };
-          return (
-            <Motion style={style} key={todo.id}>
-              {({ scale, shadow, y }) =>
-                <div
-                  onMouseDown={this.handleMouseDown.bind(null, todo.pos, y)}
-                  onTouchStart={this.handleTouchStart.bind(null, todo.pos, y)}
-                  className="react-motion-todo-item"
-                  style={{
-                    boxShadow: `rgba(0, 0, 0, 0.2) 0px ${shadow}px ${2 * shadow}px 0px`,
-                    transform: `translate3d(0, ${y}px, 0) scale(${scale})`,
-                    WebkitTransform: `translate3d(0, ${y}px, 0) scale(${scale})`,
-                    zIndex: todo.pos === originalPosOfLastPressed ? 99 : todo.pos
-                  }}
-                >
-                  {todo.text}
-                </div>
+        <div className="react-motion-new-todo">
+          {this.state.todos.map((todo) => {
+            const style = originalPosOfLastPressed === todo.pos && isPressed
+              ? {
+                scale: spring(1, springConfig),
+                shadow: spring(10, springConfig),
+                y: mouseY
               }
-            </Motion>
-          );
-        })}
+              : {
+                scale: spring(1, springConfig),
+                shadow: spring(1, springConfig),
+                y: spring(order.indexOf(todo.pos) * 50, springConfig)
+              };
+            return (
+              <Motion style={style} key={todo.id}>
+                {({ scale, shadow, y }) =>
+                  <div
+                    onMouseDown={this.handleMouseDown.bind(null, todo.pos, y)}
+                    onTouchStart={this.handleTouchStart.bind(null, todo.pos, y)}
+                    className="react-motion-todo-item"
+                    style={{
+                      boxShadow: `rgba(0, 0, 0, 0.2) 0px ${shadow}px ${2 * shadow}px 0px`,
+                      transform: `translate3d(0, ${y}px, 0) scale(${scale})`,
+                      WebkitTransform: `translate3d(0, ${y}px, 0) scale(${scale})`,
+                      zIndex: todo.pos === originalPosOfLastPressed ? 99 : todo.pos
+                    }}
+                  >
+                    <input
+                      className="toggle"
+                      type="checkbox"
+                      onChange={(e) => { this.completeTodo(e.target.value, todo.pos); }}
+                      checked={todo.isCompleted}
+                    />
+                    <div className="todo-text">
+                      {todo.text}
+                    </div>
+
+                  </div>
+                }
+              </Motion>
+            );
+          })}
+        </div>
+        <div className="react-motion-completed-todo">
+
+        </div>
       </div>
     );
   }
